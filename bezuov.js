@@ -23,7 +23,10 @@ window.onload = function() {
     document.querySelector('input').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             document.getElementById("rjesenja").innerHTML = ''
-            document.getElementById("gliga").innerHTML = `\\(${document.querySelector('input').value}\\)`
+            let formula = document.querySelector('input').value
+            formula = formula.replace(/x\^/g, 'x^{').replace(/ *- */g,'}-').replace(/ *\+ */g,'}+').replace(/[^\d]}/g,'x')
+            console.log(formula)
+            document.getElementById("gliga").innerHTML = `\\(${formula}\\)`
             document.getElementById("break").style.visibility = 'hidden'
             MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
             bezuov(document.querySelector('input').value)
@@ -87,7 +90,6 @@ function bezuov(input) {
         }
     }
 
-    let final = []
     for (const djelioc of djelioci) {
         let rezultat = ""
         let ostatak = clanovi[0]
@@ -106,6 +108,7 @@ function bezuov(input) {
                 rezultat = rezultat.substring(1)
             }
             var node = document.createElement("p");
+            rezultat = rezultat.replace(/x\^/g, 'x^{').replace(/ *- */g,'}-').replace(/ *\+ */g,'}+').replace(/[^\d]}/g,'x')
             if (djelioc*-1 > 0) {
                 var textnode = document.createTextNode(`\\((${rezultat})(x+${djelioc*-1})\\)`);
             }else {
