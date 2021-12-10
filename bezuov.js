@@ -1,3 +1,7 @@
+Array.prototype.insert = function ( index, item ) {
+    this.splice( index, 0, item );
+};
+
 function changefontsize() {
     var myInput = document.getElementById('input');
     currentfontsize = 35;
@@ -24,7 +28,18 @@ window.onload = function() {
         if (e.key === 'Enter') {
             document.getElementById("rjesenja").innerHTML = ''
             let formula = document.querySelector('input').value
+            let clanovi = document.querySelector('input').value.toLowerCase().replace(/ /g, '').replace(/-/g, '+-').split('+').filter(e => e)
+            formula = formula.replace(/\+1x/g, '+x')
+            formula = formula.replace(/-1x/g, '-x')
+            if (formula[0] == '+') {
+                formula = formula.substring(1)
+            }
+            formula = formula.replace(/(\+|-)0x(\^\d*)?/g,'')
             formula = formula.replace(/x\^/g, 'x^{').replace(/ *- */g,'}-').replace(/ *\+ */g,'}+').replace(/[^\d]}/g,'x')
+            console.log(clanovi[clanovi.length-1])
+            if (clanovi[clanovi.length-1].includes('x^')) {
+                formula += '}'
+            }
             console.log(formula)
             document.getElementById("gliga").innerHTML = `\\(${formula}\\)`
             document.getElementById("break").style.visibility = 'hidden'
@@ -107,6 +122,7 @@ function bezuov(input) {
             if (rezultat[0] == '+') {
                 rezultat = rezultat.substring(1)
             }
+            rezultat = rezultat.replace(/(\+|-)0x(\^\d*)?/g,'')
             var node = document.createElement("p");
             rezultat = rezultat.replace(/x\^/g, 'x^{').replace(/ *- */g,'}-').replace(/ *\+ */g,'}+').replace(/[^\d]}/g,'x')
             if (djelioc*-1 > 0) {
