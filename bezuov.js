@@ -26,6 +26,7 @@ function changefontsize() {
 window.onload = function() {
     document.querySelector('input').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
+            dupes = []
             document.getElementById("rjesenja").innerHTML = ''
             let formula = document.querySelector('input').value
             let clanovi = document.querySelector('input').value.toLowerCase().replace(/ /g, '').replace(/-/g, '+-').split('+').filter(e => e)
@@ -54,7 +55,7 @@ window.onload = function() {
     
 }
 
-const dupes = []
+let dupes = []
 /**
  * 
  * @param {string} input 
