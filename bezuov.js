@@ -2,60 +2,63 @@ Array.prototype.insert = function ( index, item ) {
     this.splice( index, 0, item );
 };
 
-function changefontsize() {
-    var myInput = document.getElementById('input');
-    currentfontsize = 35;
-    if(isOverflown(myInput)) {
-      while (isOverflown(myInput)){
-      currentfontsize--;
-      myInput.style.fontSize = currentfontsize + 'px';
-      }
-    }else {
-      myInput.style.fontSize = currentfontsize + 'px';
-      while (isOverflown(myInput)){
-      currentfontsize--;
-      myInput.style.fontSize = currentfontsize + 'px';
-      }
-    }	
-  }
-  
-  function isOverflown(element) {
-      return element.scrollWidth > element.clientWidth;
-  }
-
 window.onload = function() {
-    document.querySelector('input').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
+    var mathFieldSpan = document.getElementById('input');
+
+    var MQ = MathQuill.getInterface(2); // for backcompat
+    var mathField = MQ.MathField(mathFieldSpan, {
+    spaceBehavesLikeTab: true, // configurable
+    handlers: {
+        edit: function() { // useful event handlers
             dupes = []
+            render = []
+            
             document.getElementById("rjesenja").innerHTML = ''
-            let formula = document.querySelector('input').value
-            let clanovi = document.querySelector('input').value.toLowerCase().replace(/ /g, '').replace(/-/g, '+-').split('+').filter(e => e)
-            formula = formula.replace(/\+1x/g, '+x')
-            formula = formula.replace(/-1x/g, '-x')
-            if (formula[0] == '+') {
-                formula = formula.substring(1)
-            }
-            formula = formula.replace(/(\+|-)0x(\^\d*)?/g,'')
-            formula = formula.replace(/\^1(?=\+|-)|\^1$/g,'')
-            formula = formula.replace(/x\^/g, 'x^{').replace(/ *- */g,'}-').replace(/ *\+ */g,'}+').replace(/[^\d]}/g,'x')
-            console.log(clanovi[clanovi.length-1])
-            if (clanovi[clanovi.length-1].includes('x^')) {
-                formula += '}'
-            }
-            if (formula[0] == '}') {
-                formula = formula.substring(1)
+            let formula = mathField.latex();
+            if (formula.includes('^0')) return;
+            if (formula.match(/{ *}/g) != null) return;
+            if (!formula.includes('{')) {
+                let clanovi = formula.toLowerCase().replace(/ /g, '').replace(/-/g, '+-').split('+').filter(e => e)
+                formula = formula.replace(/\+1x/g, '+x')
+                formula = formula.replace(/-1x/g, '-x')
+                if (formula[0] == '+') {
+                    formula = formula.substring(1)
+                }
+                formula = formula.replace(/(\+|-)0x(\^\d*)?/g,'')
+                formula = formula.replace(/\^1(?=\+|-)|\^1$/g,'')
+                formula = formula.replace(/x\^/g, 'x^{').replace(/ *- */g,'}-').replace(/ *\+ */g,'}+').replace(/[^\d]}/g,'x')
+                console.log(clanovi[clanovi.length-1])
+                if (clanovi[clanovi.length-1].includes('x^')) {
+                    formula += '}'
+                }
+                if (formula[0] == '}') {
+                    formula = formula.substring(1)
+                }
             }
             console.log(formula)
-            document.getElementById("gliga").innerHTML = `\\(${formula}\\)`
-            document.getElementById("break").style.visibility = 'hidden'
-            MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
-            bezuov(document.querySelector('input').value)
+            bezuov(formula.replace(/{|}/g,''))
+
+            render.sort()
+            let i = 0;
+            for (const text of render) {
+                let node = document.createElement("span");
+                node.setAttribute('id',`gliga${i}`)
+                var textnode = document.createTextNode(text);
+                node.appendChild(textnode);
+                document.getElementById("rjesenja").appendChild(node);
+                document.getElementById("rjesenja").appendChild(document.createElement('br'))
+                document.getElementById("rjesenja").appendChild(document.createElement('br'))
+                MQ.StaticMath(document.getElementById(`gliga${i}`));
+                i++;
+            }
+            //MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
         }
-    });
-    
+    }
+    });    
 }
 
 let dupes = []
+let render = []
 /**
  * 
  * @param {string} input 
@@ -63,7 +66,8 @@ let dupes = []
  */
 function bezuov(input, prev='') {
     /** @type {string[]} */
-    let clanovi = input.toLowerCase().replace(/ /g, '').replace(/-/g, '+-').replace(/\^1(?=\+|-)|\^1$/g,'').replace(/-0(x\^\d)?|\+0(x\^\d)?/g,'').split('+').filter(e => e).map(e => e.includes('x') ? (e.split('x')[0] == '' ? '1'+e: ( e.split('x')[0] == '-' ? e.replace('-','-1') : e)) : e)
+    let gligs = input;
+    let clanovi = gligs.toLowerCase().replace(/ /g, '').replace(/-/g, '+-').replace(/\^1(?=\+|-)|\^1$/g,'').replace(/-0(x\^\d)?|\+0(x\^\d)?/g,'').split('+').filter(e => e).map(e => e.includes('x') ? (e.split('x')[0] == '' ? '1'+e: ( e.split('x')[0] == '-' ? e.replace('-','-1') : e)) : e)
     console.log('--------'+clanovi+'--------')
     let i = 0;
     for (let pow = parseInt(clanovi[0].split('^')[1]); pow > 0; pow--) {
@@ -144,7 +148,6 @@ function bezuov(input, prev='') {
         console.log(ostatak)
         if (ostatak == 0 || ostatak == '0x') {
             if (rezultat != 1) {
-                document.getElementById("break").style.visibility = 'visible'
                 rezultat = rezultat.replace(/\+1x/g, '+x')
                 rezultat = rezultat.replace(/-1x/g, '-x')
                 if (rezultat[0] == '+') {
@@ -160,11 +163,7 @@ function bezuov(input, prev='') {
                     console.log('GEEEEEEEEEEEEEEEEEEEEEEEEEEE:'+gege)
                     console.log(dupes)
                     if (!(dupes.includes(gege))) {
-                        let node = document.createElement("p");
-                        var textnode = document.createTextNode((rezultat.split(/\+|-/g).length > 1) ? `\\((${rezultat})(x+${djelioc*-1})${prev}\\)` : `\\(${rezultat}(x+${djelioc*-1})${prev}\\)`);
-                        node.appendChild(textnode);
-                        document.getElementById("rjesenja").appendChild(node);
-                        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+                        render.push((rezultat.split(/\+|-/g).length > 1) ? `(${rezultat})(x+${djelioc*-1})${prev}` : `${rezultat}(x+${djelioc*-1})${prev}`)
                         dupes.push(gege)
                     }
                     bezuov(rezultat.replace(/{|}/g,''),`(x+${djelioc*-1})${prev}`)
@@ -173,11 +172,7 @@ function bezuov(input, prev='') {
                     console.log('GEEEEEEEEEEEEEEEEEEEEEEEEEEE:'+gege)
                     console.log(dupes)
                     if (!(dupes.includes(gege))) {
-                        let node = document.createElement("p");
-                        var textnode = document.createTextNode((rezultat.split(/\+|-/g).length > 1) ? `\\((${rezultat})(x${djelioc*-1})${prev}\\)` : `\\(${rezultat}(x${djelioc*-1})${prev}\\)`);
-                        node.appendChild(textnode);
-                        document.getElementById("rjesenja").appendChild(node);
-                        MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+                        render.push((rezultat.split(/\+|-/g).length > 1) ? `(${rezultat})(x${djelioc*-1})${prev}` : `${rezultat}(x${djelioc*-1})${prev}`)
                         dupes.push(gege)
                     }
                     bezuov(rezultat.replace(/{|}/g,''),`(x${djelioc*-1})${prev}`)
