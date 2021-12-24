@@ -9,14 +9,31 @@ window.onload = function() {
     var mathField = MQ.MathField(mathFieldSpan, {
     spaceBehavesLikeTab: true, // configurable
     handlers: {
-        edit: function() { // useful event handlers
+        edit: function() {
+
+        }
+    }
+    });    
+
+    $("textarea").keypress(function (e) {
+        if (e.which === 13 && !e.shiftKey) {
+            e.preventDefault();
+
+            document.getElementById("info").innerHTML = ''
+            document.getElementById("")
             dupes = []
             render = []
             
             document.getElementById("rjesenja").innerHTML = ''
             let formula = mathField.latex();
-            if (formula.includes('^0')) return;
-            if (formula.match(/{ *}/g) != null) return;
+            if (formula.includes('^0') || formula.match(/{ *}/g) != null) {
+                let node = document.createElement("p");
+                node.setAttribute('id',`error`)
+                var textnode = document.createTextNode('Neispravno unjet polinom');
+                node.appendChild(textnode);
+                document.getElementById("rjesenja").appendChild(node);
+                return;
+            };
             if (!formula.includes('{')) {
                 let clanovi = formula.toLowerCase().replace(/ /g, '').replace(/-/g, '+-').split('+').filter(e => e)
                 formula = formula.replace(/\+1x/g, '+x')
@@ -36,7 +53,23 @@ window.onload = function() {
                 }
             }
             console.log(formula)
-            bezuov(formula.replace(/{|}/g,''))
+            try {
+                bezuov(formula.replace(/{|}/g,''))
+            }catch(error){}
+
+            console.log(render.length)
+
+            if (render.length == 0) {
+                let node = document.createElement("p");
+                node.setAttribute('id',`error`)
+                var textnode = document.createTextNode('Ovaj polinom se ne može rastaviti preko Bezuove teoreme');
+                node.appendChild(textnode);
+                document.getElementById("rjesenja").appendChild(node);
+            }else {
+                try {
+                    document.getElementById("error").innerHTML = ''
+                } catch (error) {}
+            }
 
             render.sort()
             let i = 0;
@@ -53,8 +86,7 @@ window.onload = function() {
             }
             //MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
         }
-    }
-    });    
+    });
 }
 
 let dupes = []
