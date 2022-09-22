@@ -6,18 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="mathquill-0.10.1/mathquill.css">
+    <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="mathquill-0.10.1/mathquill.js"></script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src=" https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
     <script src="https://unpkg.com/mathjs/lib/browser/math.js"></script>
+    <script defer src="//unpkg.com/mathlive"></script>
     <script src="bezuov.js"></script>
     <title>Bezuova teorema</title>
 </head>
 <body>
     <h1>Bezuova teorema</h1>
-    <span class="input" id='input'></span>
+    <math-field virtual-keyboard-mode="auto" class="input" id='input'></math-field>
+    
     <p id="info">Unesite sređeni polinom u opadajućem nizu.<br><br><b>Bezuov stav</b> predstavlja posebnu metodu rastavljanja polinoma na činioce.<br>Dobio je ime po francuskom matematičaru <b>Etjenu Bezuu</b>.</p>
+    <p id="info-mobile">Uslikajte sređeni polinom u opadajućem nizu.<br><br><b>Bezuov stav</b> predstavlja posebnu metodu rastavljanja polinoma na činioce.<br>Dobio je ime po francuskom matematičaru <b>Etjenu Bezuu</b>.</p>
     <div class='rjesenja' id='rjesenja'></div>  
     <div class='credit'>
     Made with ❤️ by Gliga

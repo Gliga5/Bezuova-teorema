@@ -3,88 +3,70 @@ Array.prototype.insert = function ( index, item ) {
 };
 
 window.onload = function() {
-    var mathFieldSpan = document.getElementById('input');
+    const mf = document.getElementById('input');
+    mf.addEventListener('change', (ev) => {
+        document.getElementById("info").innerHTML = ''
+        document.getElementById("")
+        dupes = []
+        render = []
+        
+        document.getElementById("rjesenja").innerHTML = ''
+        let formula = ev.target.value;
 
-    var MQ = MathQuill.getInterface(2); // for backcompat
-    var mathField = MQ.MathField(mathFieldSpan, {
-    spaceBehavesLikeTab: true, // configurable
-    handlers: {
-        edit: function() {
-
+        if (formula.includes('^0') || formula.match(/{ *}/g) != null) {
+            let node = document.createElement("p");
+            node.setAttribute('id',`error`)
+            let textnode = document.createTextNode('Neispravno unjet polinom');
+            node.appendChild(textnode);
+            document.getElementById("rjesenja").appendChild(node);
+            return;
+        };
+        if (!formula.includes('{')) {
+            let clanovi = formula.toLowerCase().replace(/ /g, '').replace(/-/g, '+-').split('+').filter(e => e)
+            formula = formula.replace(/\+1x/g, '+x')
+            formula = formula.replace(/-1x/g, '-x')
+            if (formula[0] == '+') {
+                formula = formula.substring(1)
+            }
+            formula = formula.replace(/(\+|-)0x(\^\d*)?/g,'')
+            formula = formula.replace(/\^1(?=\+|-)|\^1$/g,'')
+            formula = formula.replace(/x\^/g, 'x^{').replace(/ *- */g,'}-').replace(/ *\+ */g,'}+').replace(/[^\d]}/g,'x')
+            console.log(clanovi[clanovi.length-1])
+            if (clanovi[clanovi.length-1] != undefined && clanovi[clanovi.length-1].includes('x^')) {
+                formula += '}'
+            }
+            if (formula[0] == '}') {
+                formula = formula.substring(1)
+            }
         }
-    }
-    });    
+        console.log(formula)
+        try {
+            bezuov(formula.replace(/{|}/g,''))
+        }catch(error){}
 
-    $("textarea").keypress(function (e) {
-        if (e.which === 13 && !e.shiftKey) {
-            e.preventDefault();
+        console.log(render.length)
 
-            document.getElementById("info").innerHTML = ''
-            document.getElementById("")
-            dupes = []
-            render = []
-            
-            document.getElementById("rjesenja").innerHTML = ''
-            let formula = mathField.latex();
-            if (formula.includes('^0') || formula.match(/{ *}/g) != null) {
-                let node = document.createElement("p");
-                node.setAttribute('id',`error`)
-                var textnode = document.createTextNode('Neispravno unjet polinom');
-                node.appendChild(textnode);
-                document.getElementById("rjesenja").appendChild(node);
-                return;
-            };
-            if (!formula.includes('{')) {
-                let clanovi = formula.toLowerCase().replace(/ /g, '').replace(/-/g, '+-').split('+').filter(e => e)
-                formula = formula.replace(/\+1x/g, '+x')
-                formula = formula.replace(/-1x/g, '-x')
-                if (formula[0] == '+') {
-                    formula = formula.substring(1)
-                }
-                formula = formula.replace(/(\+|-)0x(\^\d*)?/g,'')
-                formula = formula.replace(/\^1(?=\+|-)|\^1$/g,'')
-                formula = formula.replace(/x\^/g, 'x^{').replace(/ *- */g,'}-').replace(/ *\+ */g,'}+').replace(/[^\d]}/g,'x')
-                console.log(clanovi[clanovi.length-1])
-                if (clanovi[clanovi.length-1].includes('x^')) {
-                    formula += '}'
-                }
-                if (formula[0] == '}') {
-                    formula = formula.substring(1)
-                }
-            }
-            console.log(formula)
+        if (render.length == 0) {
+            let node = document.createElement("p");
+            node.setAttribute('id',`error`)
+            let textnode = document.createTextNode('Ovaj polinom se ne može rastaviti preko Bezuove teoreme');
+            node.appendChild(textnode);
+            document.getElementById("rjesenja").appendChild(node);
+        }else {
             try {
-                bezuov(formula.replace(/{|}/g,''))
-            }catch(error){}
+                document.getElementById("error").innerHTML = ''
+            } catch (error) {}
+        }
 
-            console.log(render.length)
-
-            if (render.length == 0) {
-                let node = document.createElement("p");
-                node.setAttribute('id',`error`)
-                var textnode = document.createTextNode('Ovaj polinom se ne može rastaviti preko Bezuove teoreme');
-                node.appendChild(textnode);
-                document.getElementById("rjesenja").appendChild(node);
-            }else {
-                try {
-                    document.getElementById("error").innerHTML = ''
-                } catch (error) {}
-            }
-
-            render.sort()
-            let i = 0;
-            for (const text of render) {
-                let node = document.createElement("span");
-                node.setAttribute('id',`gliga${i}`)
-                var textnode = document.createTextNode(text);
-                node.appendChild(textnode);
-                document.getElementById("rjesenja").appendChild(node);
-                document.getElementById("rjesenja").appendChild(document.createElement('br'))
-                document.getElementById("rjesenja").appendChild(document.createElement('br'))
-                MQ.StaticMath(document.getElementById(`gliga${i}`));
-                i++;
-            }
-            //MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+        render.sort()
+        for (const text of render) {
+            let node = document.createElement("math-field");
+            node.setAttribute('read-only','')
+            node.setAttribute('style',"display:inline-block")
+            let textnode = document.createTextNode(text);
+            node.appendChild(textnode);
+            document.getElementById("rjesenja").appendChild(node);
+            document.getElementById("rjesenja").appendChild(document.createElement('br'))
         }
     });
 }
